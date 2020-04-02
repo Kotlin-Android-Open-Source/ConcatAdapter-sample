@@ -1,0 +1,2 @@
+rootProject.name='MergeAdapter-sample'
+include ':app'
