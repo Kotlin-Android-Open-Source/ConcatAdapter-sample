@@ -11,14 +11,11 @@ import com.hoc.mergeadapter_sample.databinding.ActivityMainBinding
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
-  private val vm by viewModels<MainVM>()
+  private val binding by lazy(NONE) { ActivityMainBinding.inflate(layoutInflater) }
+  private val viewModel by viewModels<MainVM>(viewModelFactoryProducer)
 
   private val userAdapter = UserAdapter()
   private val footerAdapter = FooterAdapter(this::onRetry)
-
-  private val binding by lazy(NONE) {
-    ActivityMainBinding.inflate(layoutInflater)
-  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -29,28 +26,23 @@ class MainActivity : AppCompatActivity() {
       val linearLayoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
       layoutManager = linearLayoutManager
       adapter = MergeAdapter(userAdapter, footerAdapter)
+
       addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
           if (dy > 0
             && linearLayoutManager.findLastVisibleItemPosition() + VISIBLE_THRESHOLD >= linearLayoutManager.itemCount
           ) {
-            vm.loadNextPage()
+            viewModel.loadNextPage()
           }
         }
       })
     }
 
-
-    vm.loadingStateLiveData.observe(this, Observer {
-      footerAdapter.submitList(it)
-    })
-    vm.userLiveData.observe(this, Observer {
-      userAdapter.submitList(it)
-    })
-    vm.loadNextPage()
+    viewModel.loadingStateLiveData.observe(this, Observer(footerAdapter::submitList))
+    viewModel.userLiveData.observe(this, Observer(userAdapter::submitList))
   }
 
-  private fun onRetry() = vm.retryNextPage()
+  private fun onRetry() = viewModel.retryNextPage()
 
   private companion object {
     private const val VISIBLE_THRESHOLD = 3

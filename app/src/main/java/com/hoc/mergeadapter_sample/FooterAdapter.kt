@@ -9,9 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.hoc.mergeadapter_sample.databinding.ItemFooterBinding
 
 class FooterAdapter(private val onRetry: () -> Unit) :
-  ListAdapter<LoadingState, FooterAdapter.VH>(object : DiffUtil.ItemCallback<LoadingState>() {
-    override fun areItemsTheSame(oldItem: LoadingState, newItem: LoadingState) = true
-    override fun areContentsTheSame(oldItem: LoadingState, newItem: LoadingState) =
+  ListAdapter<PlaceholderState, FooterAdapter.VH>(object :
+    DiffUtil.ItemCallback<PlaceholderState>() {
+    override fun areItemsTheSame(oldItem: PlaceholderState, newItem: PlaceholderState) = true
+    override fun areContentsTheSame(oldItem: PlaceholderState, newItem: PlaceholderState) =
       oldItem == newItem
   }) {
 
@@ -32,16 +33,16 @@ class FooterAdapter(private val onRetry: () -> Unit) :
       }
     }
 
-    fun bind(item: LoadingState) {
+    fun bind(item: PlaceholderState) {
       when (item) {
-        LoadingState.Loading -> {
+        PlaceholderState.Loading -> {
           binding.run {
             buttonRetry.visibility = View.INVISIBLE
             textViewError.visibility = View.INVISIBLE
             progressBar.visibility = View.VISIBLE
           }
         }
-        is LoadingState.Error -> {
+        is PlaceholderState.Failure -> {
           binding.run {
             buttonRetry.visibility = View.VISIBLE
             textViewError.visibility = View.VISIBLE
@@ -49,6 +50,7 @@ class FooterAdapter(private val onRetry: () -> Unit) :
             progressBar.visibility = View.INVISIBLE
           }
         }
+        PlaceholderState.Idle -> error("Should not be here!")
       }
     }
   }
