@@ -12,25 +12,29 @@ sealed class PlaceholderState {
   data class Failure(val throwable: Throwable) : PlaceholderState()
 }
 
-class MainVM(private val getUsers: suspend (start: Int, limit: Int) -> List<User>) : ViewModel() {
+class MainVM(
+  private val getUsers: suspend (start: Int, limit: Int) -> List<User>
+) : ViewModel() {
 
-  //region Private
+  //region Private fields
   private val usersD by lazy(NONE) {
     MutableLiveData<List<User>>()
       .apply { value = emptyList() }
-      .also { loadNextPage() /* load first page when first accessing*/ }
+      .also { loadNextPage() }
   }
   private val loadingStateD = MutableLiveData<PlaceholderState>().apply { value = Idle }
   private val firstPageStateD = MutableLiveData<PlaceholderState>().apply { value = Idle }
+  private val isRefreshingD = MutableLiveData<Boolean>().apply { value = false }
 
   private var isFirstPage = true
+  private var loadedAllPage = false
 
   private val shouldLoadNextPage: Boolean
     get() = if (isFirstPage) {
       firstPageStateD.value!! == Idle
     } else {
       loadingStateD.value!! == Idle
-    }
+    } && !loadedAllPage
 
   private val shouldRetryNextPage: Boolean
     get() = if (isFirstPage) {
@@ -45,10 +49,12 @@ class MainVM(private val getUsers: suspend (start: Int, limit: Int) -> List<User
 
   val userLiveData: LiveData<List<User>> get() = usersD
 
-  val firstPageStateLiveData: LiveData<PlaceholderState> = firstPageStateD
+  val firstPageStateLiveData: LiveData<PlaceholderState> get() = firstPageStateD
 
   val loadingStateLiveData: LiveData<List<PlaceholderState>>
     get() = loadingStateD.map { if (it == Idle) emptyList() else listOf(it) }
+
+  val isRefreshingLiveData: LiveData<Boolean> get() = isRefreshingD
 
   //endregion
 
@@ -56,50 +62,66 @@ class MainVM(private val getUsers: suspend (start: Int, limit: Int) -> List<User
   @MainThread
   fun loadNextPage() {
     if (shouldLoadNextPage) {
-      loadNextPageInternal()
+      loadPageInternal()
     }
   }
 
   @MainThread
   fun retryNextPage() {
     if (shouldRetryNextPage) {
-      loadNextPageInternal()
+      loadPageInternal()
     }
+  }
+
+  @MainThread
+  fun refresh() {
+    loadPageInternal(refresh = true)
   }
   //endregion
 
-  private fun loadNextPageInternal() {
+  //region Private methods
+  private fun updateState(state: PlaceholderState) {
+    if (isFirstPage) {
+      firstPageStateD.value = state
+    } else {
+      loadingStateD.value = state
+    }
+  }
+
+  private fun loadPageInternal(refresh: Boolean = false) {
     viewModelScope.launch {
-      if (isFirstPage) {
-        firstPageStateD.value = Loading
+      if (refresh) {
+        isRefreshingD.value = true
       } else {
-        loadingStateD.value = Loading
+        updateState(Loading)
       }
 
-      val currentList = usersD.value!!
+      val currentList = if (refresh) emptyList() else usersD.value!!
 
       runCatching { getUsers(currentList.size, LIMIT) }
         .fold(
           onSuccess = {
-            isFirstPage = currentList.isEmpty()
+            if (refresh) {
+              isRefreshingD.value = false
+            } else {
+              updateState(Idle)
+            }
             usersD.value = currentList + it
 
-            if (isFirstPage) {
-              firstPageStateD.value = Idle
-            } else {
-              loadingStateD.value = Idle
-            }
+            isFirstPage = false
+            loadedAllPage = it.isEmpty()
           },
           onFailure = {
-            if (isFirstPage) {
-              firstPageStateD.value = Failure(it)
+            if (refresh) {
+              isRefreshingD.value = false
             } else {
-              loadingStateD.value = Failure(it)
+              updateState(Failure(it))
             }
           }
         )
     }
   }
+  //endregion
 
   private companion object {
     const val LIMIT = 20

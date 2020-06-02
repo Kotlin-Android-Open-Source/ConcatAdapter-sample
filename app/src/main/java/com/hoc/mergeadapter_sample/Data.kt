@@ -1,8 +1,10 @@
 package com.hoc.mergeadapter_sample
 
+import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.withContext
+import kotlin.random.Random
 
 //region Models
 data class User(
@@ -16,21 +18,34 @@ object ApiError : Throwable(message = "Api error")
 
 //region Fake api calling
 suspend fun getUsers(start: Int, limit: Int): List<User> {
-  delay(2_000)
+  return withContext(Dispatchers.IO) {
+    Log.d("###", "getUsers { start: $start, limit: $limit }")
+    delay(2_000)
 
-  if (count.getAndIncrement() == 2 && throwError.compareAndSet(true, false)) {
-    throw ApiError
-  }
+    val page = start / limit
 
-  return List(limit) {
-    User(
-      uid = start + it,
-      name = "Name ${start + it}",
-      email = "email${start + it}@gmail.com",
-    )
+    // throws at page 2
+    if (page == 2 && Random.nextBoolean()) {
+      throw ApiError
+    }
+
+    // throws at page 0
+    if (page == 0 && Random.nextBoolean()) {
+      throw ApiError
+    }
+
+    // returns empty list at page 4
+    if (page == 4) {
+      emptyList()
+    } else {
+      List(limit) {
+        User(
+          uid = start + it,
+          name = "Name ${start + it}",
+          email = "email${start + it}@gmail.com",
+        )
+      }
+    }
   }
 }
-
-private val count = AtomicInteger(0)
-private val throwError = AtomicBoolean(true)
 //endregion
