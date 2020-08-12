@@ -1,5 +1,5 @@
-# MergeAdapter-sample
-Load more recyclerview android using MergeAdapter
+# ConcatAdapter-sample
+Load more recyclerview android using `ConcatAdapter`
 
 | Screenshot 01 | Screenshot 02 |
 | --------------- | ---------------- |
