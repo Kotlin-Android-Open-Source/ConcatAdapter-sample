@@ -1,8 +1,8 @@
-package com.hoc.mergeadapter_sample
+package com.hoc.concatadapter_sample
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.*
-import com.hoc.mergeadapter_sample.PlaceholderState.*
+import com.hoc.concatadapter_sample.PlaceholderState.*
 import kotlinx.coroutines.launch
 import kotlin.LazyThreadSafetyMode.NONE
 

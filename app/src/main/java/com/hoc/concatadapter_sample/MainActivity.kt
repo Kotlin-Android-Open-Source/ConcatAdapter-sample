@@ -1,14 +1,14 @@
-package com.hoc.mergeadapter_sample
+package com.hoc.concatadapter_sample
 
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.mergeadapter_sample.databinding.ActivityMainBinding
+import com.hoc.concatadapter_sample.databinding.ActivityMainBinding
 import kotlin.LazyThreadSafetyMode.NONE
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     binding.recyclerView.run {
       setHasFixedSize(true)
       layoutManager = linearLayoutManager
-      adapter = MergeAdapter(userAdapter, footerAdapter)
+      adapter = ConcatAdapter(userAdapter, footerAdapter)
     }
 
     // observe livedatas

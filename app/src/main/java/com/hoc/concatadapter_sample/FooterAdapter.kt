@@ -1,4 +1,4 @@
-package com.hoc.mergeadapter_sample
+package com.hoc.concatadapter_sample
 
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.mergeadapter_sample.databinding.ItemFooterBinding
+import com.hoc.concatadapter_sample.databinding.ItemFooterBinding
 
 class FooterAdapter(private val onRetry: () -> Unit) :
   ListAdapter<PlaceholderState, FooterAdapter.VH>(object :

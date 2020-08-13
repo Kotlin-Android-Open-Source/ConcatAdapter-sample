@@ -1,11 +1,11 @@
-package com.hoc.mergeadapter_sample
+package com.hoc.concatadapter_sample
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.hoc.mergeadapter_sample.databinding.ItemUserBinding
+import com.hoc.concatadapter_sample.databinding.ItemUserBinding
 
 class UserAdapter :
   ListAdapter<User, UserAdapter.VH>(object : DiffUtil.ItemCallback<User>() {

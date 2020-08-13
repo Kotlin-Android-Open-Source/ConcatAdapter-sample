@@ -1,4 +1,4 @@
-package com.hoc.mergeadapter_sample
+package com.hoc.concatadapter_sample
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
